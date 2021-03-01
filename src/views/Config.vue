@@ -77,6 +77,59 @@
 			</div>
 			<!-- </el-scrollbar> -->
 		</el-main>
+		<el-dialog :title="dialog.title" :visible.sync="dialog.visible" :width="dialog.width">
+			<div>
+				<el-form
+					:model="formData"
+					:rules="rules"
+					ref="form"
+					status-icon
+					label-suffix=":"
+					label-width="100px"
+					size="medium"
+				>
+					<el-form-item label="所属分组" prop="group">
+						<el-select v-model="formData.group" placeholder="请选择所属分组" class="w100">
+							<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+						</el-select>
+					</el-form-item>
+					<el-form-item label="大屏名称" prop="title">
+						<el-input v-model="formData.title" placeholder="请输入大屏名称"></el-input>
+					</el-form-item>
+					<el-row :gutter="20">
+						<el-col :span="14">
+							<el-form-item label="大屏尺寸" prop="width">
+								<el-input-number
+									v-model.number="formData.width"
+									placeholder="请输入宽度"
+									controls-position="right"
+									:min="100"
+									class="w100"
+								></el-input-number>
+							</el-form-item>
+						</el-col>
+						<el-col :span="10">
+							<el-form-item prop="height" label-width="0px">
+								<el-input-number
+									v-model.number="formData.height"
+									placeholder="请输入高度"
+									controls-position="right"
+									:min="100"
+									class="w100"
+								></el-input-number>
+							</el-form-item>
+						</el-col>
+					</el-row>
+					<el-form-item label="访问密码" prop="password">
+						<el-input type="password" v-model="formData.password" autocomplete="off" placeholder="请输入密码"></el-input>
+					</el-form-item>
+				</el-form>
+			</div>
+			<span slot="footer" class="dialog-footer">
+				<el-button size="small" @click="cancel('form')">取 消</el-button>
+				<el-button size="small" type="primary" @click="save('form')">确 定</el-button>
+			</span>
+		</el-dialog>
 	</el-container>
 </template>
 
@@ -112,6 +165,63 @@ export default {
 						"https://oss.bladex.vip/caster/upload/20201122/2bcf7deba047b28954099fea71b64c29.jpg",
 				},
 			],
+			dialog: {
+				title: "新建大屏",
+				visible: false,
+				width: "35%",
+			},
+			formData: {
+				group: "",
+				title: "",
+				width: 1920,
+				height: 1080,
+				password: "",
+			},
+			rules: {
+				group: {
+					required: true,
+					message: "请选择所属分组",
+					trigger: "change",
+				},
+				title: [
+					{
+						required: true,
+						message: "请填写大屏名称",
+						trigger: "blur",
+					},
+				],
+				width: [
+					{
+						required: true,
+						message: "请填写大屏宽度",
+						trigger: "blur",
+					},
+				],
+				height: [
+					{
+						required: true,
+						message: "请填写大屏高度",
+						trigger: "blur",
+					},
+				],
+				password: [
+					{
+						required: true,
+						message: "请填写大屏密码",
+						trigger: "blur",
+					},
+				],
+			},
+			options: [
+				{
+					value: "1",
+					label: "集约化",
+				},
+				{
+					value: "2",
+					label: "新媒体",
+				},
+			],
 		};
 	},
 	methods: {
@@ -125,6 +235,14 @@ export default {
 			console.log(`当前页: ${val}`);
 		},
 		add() {
+			this.dialog.visible = true;
+			this.formData = {
+				group: "1",
+				title: "测试数据",
+				width: 1920,
+				height: 1080,
+				password: "123456",
+			};
 			console.log("add");
 		},
 		del(id) {
@@ -174,6 +292,26 @@ export default {
 				params: { id },
 			});
 			window.open(routeData.href, "_blank");
+		},
+		cancel(formName) {
+			this.$refs[formName].resetFields();
+			this.dialog.visible = false;
+		},
+		save(formName) {
+			this.$refs[formName].validate((valid) => {
+				if (valid) {
+					console.log(JSON.stringify(this[`${formName}Data`]));
+					this.dialog.visible = false;
+					const id = new Date().getTime();
+					this.$router.push({
+						name: "Edit",
+						params: { id },
+					});
+				} else {
+					console.log("error submit!!");
+					return false;
+				}
+			});
 		},
 	},
 };

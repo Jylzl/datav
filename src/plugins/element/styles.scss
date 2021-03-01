@@ -1,5 +1,6 @@
 /* theme color */
-$--color-primary: #409EFF;
+$--color-primary: #00baff;
+$--color-black: #1b1e25;
 
 /* icon font path, required */
 $--font-path: '~element-ui/lib/theme-chalk/fonts';
@@ -26,7 +27,7 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
 
 // 对话框
 .el-dialog__header {
-    background-color: $--color-primary;
+    background-color: $--color-black;
     padding-top: 8px;
     padding-bottom: 8px;
 
@@ -70,6 +71,19 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
 }
 
 .el-message-box {
-    background: #1b1e25;
-    border-color: #1b1e25;
+    background: $--color-black;
+    border-color: $--color-black;
+}
+
+.el-dropdown-menu {
+    background: $--color-black;
+    border-color: $--color-black;
+}
+
+.el-popper[x-placement^=bottom] .popper__arrow::after {
+    border-bottom-color: $--color-black;
+}
+
+.el-popper[x-placement^=bottom] .popper__arrow {
+    border-bottom-color: $--color-black;
 }

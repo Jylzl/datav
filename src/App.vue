@@ -14,7 +14,11 @@ body,
 	margin: 0;
 }
 
+.w100 {
+	width: 100% !important;
+}
+
 .h100 {
-	height: 100%;
+	height: 100% !important;
 }
 </style>
