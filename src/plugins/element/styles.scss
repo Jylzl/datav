@@ -1,5 +1,6 @@
 /* theme color */
 $--color-primary: #00baff;
+// $--color-primary: rgb(33, 37, 40);
 $--color-black: #1b1e25;
 
 /* icon font path, required */
@@ -76,6 +77,11 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
 }
 
 .el-dropdown-menu {
+    background: $--color-black;
+    border-color: $--color-black;
+}
+
+.el-popover {
     background: $--color-black;
     border-color: $--color-black;
 }

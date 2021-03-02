@@ -1,6 +1,6 @@
 <template>
 	<div class="datav-page">
-		<dv-full-screen-container>
+		<dv-full-screen-container style="position: relative;">
 			<dv-border-box-11 class="index-box" title="集约化监控平台">
 				<!-- <d-player :options="options" class="d-player-box"></d-player> -->
 				<el-row :gutter="20">
@@ -48,6 +48,7 @@
 // import "vue-dplayer/dist/vue-dplayer.css";
 
 export default {
+	name: "d-view",
 	components: {
 		// "d-player": VueDPlayer,
 	},
