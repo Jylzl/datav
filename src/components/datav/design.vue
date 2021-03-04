@@ -458,7 +458,8 @@ export default {
 	position: relative;
 	width: 5000px;
 	height: 3000px;
-	background: url(../../assets/img/canvas_bg.png) repeat;
+	background: url(../../assets/svg/grid.svg);
+	/* background: url(../../assets/img/canvas_bg.png) repeat; */
 }
 
 .datav-editor .canvas-scrollbar-wrapper {
