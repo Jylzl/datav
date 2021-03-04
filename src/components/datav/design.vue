@@ -115,7 +115,23 @@
 						</div>
 					</div>
 				</el-main>
-				<el-aside width="260px">1</el-aside>
+				<el-aside width="260px">
+					<div class="datav-editor-right-bar">
+						<div class="component-box">
+							<div
+								class="component-item"
+								v-for="(c,index) in componentData"
+								:key="c.key"
+								@contextmenu.prevent="onContextmenu(...arguments,index)"
+							>
+								<div class="component-icon">
+									<i :class="c.icon"></i>
+								</div>
+								<div class="component-title">{{c.label}}</div>
+							</div>
+						</div>
+					</div>
+				</el-aside>
 			</el-container>
 		</el-main>
 	</el-container>
@@ -123,6 +139,8 @@
 
 <script>
 import screenfull from "screenfull";
+import { deepClone } from "./util";
+
 import { components } from "@/components/datav/components/index.js";
 import view from "@/components/datav/view.vue";
 
@@ -206,8 +224,101 @@ export default {
 		},
 		// 创建组件
 		pushComponent(data) {
+			const obj = deepClone(data);
+			obj.key = new Date().getTime();
 			console.log(JSON.stringify(data));
-			this.componentData.push(data);
+			console.log(JSON.stringify(obj));
+			this.componentData.push(obj);
+		},
+		// 右键菜单
+		onContextmenu(event, index) {
+			console.log(index);
+			this.$contextmenu({
+				items: [
+					{
+						label: "组合分组",
+						icon: "el-icon-takeaway-box",
+						onClick: () => {
+							console.log("组合分组");
+						},
+					},
+					{
+						label: "删除图层",
+						icon: "el-icon-delete",
+						onClick: () => {
+							console.log("删除图层");
+							this.componentData.splice(index, 1);
+						},
+					},
+					{
+						label: "复制图层",
+						icon: "el-icon-copy-document",
+						onClick: () => {
+							console.log("复制图层");
+							const obj = deepClone(this.componentData[index]);
+							obj.key = new Date().getTime();
+							this.componentData.push(obj);
+						},
+					},
+					{
+						label: "置顶图层",
+						icon: "el-icon-top",
+						onClick: () => {
+							console.log("置顶图层");
+							const temp = this.componentData[0];
+							this.componentData[0] = this.componentData[
+								this.componentData.lenght - 1
+							];
+							this.componentData[
+								this.componentData.lenght - 1
+							] = temp;
+						},
+					},
+					{
+						label: "置底图层",
+						icon: "el-icon-bottom",
+						onClick: () => {
+							console.log("置底图层");
+							const temp = this.componentData[0];
+							this.componentData[0] = this.componentData[
+								this.componentData.lenght - 1
+							];
+							this.componentData[
+								this.componentData.lenght - 1
+							] = temp;
+						},
+					},
+					{
+						label: "上移一层",
+						icon: "el-icon-arrow-up",
+						disabled: index == 0,
+						onClick: () => {
+							console.log("上移一层");
+							const temp = this.componentData[1];
+							this.componentData[1] = this.componentData[2];
+							this.componentData[2] = temp;
+						},
+					},
+					{
+						label: "下移一层",
+						icon: "el-icon-arrow-down",
+						disabled: index == this.componentData.length - 1,
+						onClick: () => {
+							console.log("下移一层");
+							const temp = this.componentData[1];
+							this.componentData[1] = this.componentData[2];
+							this.componentData[2] = temp;
+						},
+					},
+				],
+				event,
+				//x: event.clientX,
+				//y: event.clientY,
+				customClass: "class-a",
+				zIndex: 999999,
+				minWidth: 100,
+			});
+			return false;
 		},
 	},
 };
