@@ -1,162 +1,411 @@
 <template>
-	<div class="datav-page">
-		<dv-full-screen-container>
-			<dv-border-box-11 class="index-box" title="集约化监控平台">
-				<!-- <d-player :options="options" class="d-player-box"></d-player> -->
+	<el-container class="p-config">
+		<el-header class="config-header">
+			<el-menu
+				:default-active="activeIndex"
+				class="config-header-menu"
+				mode="horizontal"
+				@select="handleSelect"
+				background-color="#161a23"
+				text-color="#ffffff"
+				active-text-color="#00baff"
+			>
+				<el-menu-item index="1">大屏管理</el-menu-item>
+				<el-menu-item index="2">地图管理</el-menu-item>
+				<el-menu-item index="3">分类管理</el-menu-item>
+			</el-menu>
+		</el-header>
+		<el-main>
+			<!-- <el-scrollbar wrap-class="scrollbar-wrapper"> -->
+			<div class="view-box">
 				<el-row :gutter="20">
-					<el-col :span="6">
-						<div class="grid-content bg-purple">
-							<!-- <dv-decoration-11 style="width:400px;height:60px;" class="margin-center">集约化监控平台</dv-decoration-11> -->
-							<dv-border-box-12 style="width:100%;height:220px" class="margin-top-20">
-								<div class="border-box padding-10">
-									<dv-scroll-board :config="config" style="width:100%;height:200px" />
+					<el-col :span="6" class="item-box">
+						<div class="item item-add" @click="add">
+							<div class="add">
+								<i class="el-icon-plus"></i>
+								<p>新建</p>
+							</div>
+						</div>
+					</el-col>
+					<el-col :span="6" v-for="i in list" :key="i.id" class="item-box">
+						<div class="item item-view">
+							<div class="view-img">
+								<img :src="i.viewImg" alt />
+							</div>
+							<div class="view-bar">
+								<div>
+									<el-link
+										:underline="false"
+										type="primary"
+										target="_blank"
+										:href="'/view/'+i.id"
+									>{{i.title}}</el-link>
 								</div>
-							</dv-border-box-12>
-							<!-- <dv-border-box-13 style="height:300px;"> -->
-							<!-- </dv-border-box-13> -->
-						</div>
-					</el-col>
-					<el-col :span="12">
-						<div class="grid-content bg-purple">
-							<!-- <div style="width:400px;height:60px;"></div> -->
-							<!-- <dv-decoration-11 style="width:400px;height:60px;" class="margin-center">集约化监控平台</dv-decoration-11> -->
-							<dv-decoration-12 style="width:220px;height:220px;" class="margin-center margin-top-20" />
-							<!-- <d-player :options="options" class="d-player-box"></d-player> -->
-						</div>
-					</el-col>
-					<el-col :span="6">
-						<div class="grid-content bg-purple">
-							<!-- <dv-decoration-11 style="width:400px;height:60px;" class="margin-center">集约化监控平台</dv-decoration-11> -->
-							<dv-capsule-chart :config="config1" style="width:100%;height:220px" class="margin-top-20" />
-							<!-- <d-player :options="options" class="d-player-box"></d-player> -->
+								<div>
+									<el-tooltip effect="dark" content="浏览" placement="top">
+										<el-button type="text" @click="view(i.id)">
+											<i class="el-icon-view"></i>
+										</el-button>
+									</el-tooltip>
+									<el-tooltip effect="dark" content="编辑" placement="top">
+										<el-button type="text" @click="edit(i.id)">
+											<i class="el-icon-edit"></i>
+										</el-button>
+									</el-tooltip>
+									<el-tooltip effect="dark" content="删除" placement="top">
+										<el-button type="text" @click="del(i.id)">
+											<i class="el-icon-delete"></i>
+										</el-button>
+									</el-tooltip>
+								</div>
+							</div>
 						</div>
 					</el-col>
 				</el-row>
-				<!-- <dv-decoration-9 style="width:150px;height:150px;">66%</dv-decoration-9>
-				<dv-decoration-11 style="width:240px;height:60px;">页面载入中...</dv-decoration-11>-->
-				<!-- <dv-decoration-1 style="width:200px;height:50px;" /> -->
-			</dv-border-box-11>
-			<!-- <dv-loading></dv-loading> -->
-		</dv-full-screen-container>
-	</div>
+			</div>
+			<div class="view-paging" v-if="false">
+				<el-pagination
+					@size-change="handleSizeChange"
+					@current-change="handleCurrentChange"
+					:current-page="currentPage"
+					:page-sizes="[50,100, 200, 300, 400]"
+					:page-size="50"
+					layout="total, sizes, prev, pager, next, jumper"
+					:total="400"
+					background
+				></el-pagination>
+			</div>
+			<!-- </el-scrollbar> -->
+		</el-main>
+		<el-dialog :title="dialog.title" :visible.sync="dialog.visible" :width="dialog.width">
+			<div>
+				<el-form
+					:model="formData"
+					:rules="rules"
+					ref="form"
+					status-icon
+					label-suffix=":"
+					label-width="100px"
+					size="medium"
+				>
+					<el-form-item label="所属分组" prop="group">
+						<el-select v-model="formData.group" placeholder="请选择所属分组" class="w100">
+							<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+						</el-select>
+					</el-form-item>
+					<el-form-item label="大屏名称" prop="title">
+						<el-input v-model="formData.title" placeholder="请输入大屏名称"></el-input>
+					</el-form-item>
+					<el-row :gutter="20">
+						<el-col :span="14">
+							<el-form-item label="大屏尺寸" prop="width">
+								<el-input-number
+									v-model.number="formData.width"
+									placeholder="请输入宽度"
+									controls-position="right"
+									:min="100"
+									class="w100"
+								></el-input-number>
+							</el-form-item>
+						</el-col>
+						<el-col :span="10">
+							<el-form-item prop="height" label-width="0px">
+								<el-input-number
+									v-model.number="formData.height"
+									placeholder="请输入高度"
+									controls-position="right"
+									:min="100"
+									class="w100"
+								></el-input-number>
+							</el-form-item>
+						</el-col>
+					</el-row>
+					<el-form-item label="访问密码" prop="password">
+						<el-input type="password" v-model="formData.password" autocomplete="off" placeholder="请输入密码"></el-input>
+					</el-form-item>
+				</el-form>
+			</div>
+			<span slot="footer" class="dialog-footer">
+				<el-button size="small" @click="cancel('form')">取 消</el-button>
+				<el-button size="small" type="primary" @click="save('form')">确 定</el-button>
+			</span>
+		</el-dialog>
+	</el-container>
 </template>
 
 <script>
-// let Hls = require("hls.js");
-// window.Hls = Hls;
-// import VueDPlayer from "vue-dplayer";
-// import "vue-dplayer/dist/vue-dplayer.css";
-
 export default {
-	components: {
-		// "d-player": VueDPlayer,
-	},
 	data() {
 		return {
-			config: {
-				data: [
-					["行1列1", "行1列2", "行1列3"],
-					["行2列1", "行2列2", "行2列3"],
-					["行3列1", "行3列2", "行3列3"],
-					["行4列1", "行4列2", "行4列3"],
-					["行5列1", "行5列2", "行5列3"],
-					["行6列1", "行6列2", "行6列3"],
-					["行7列1", "行7列2", "行7列3"],
-					["行8列1", "行8列2", "行8列3"],
-					["行9列1", "行9列2", "行9列3"],
-					["行10列1", "行10列2", "行10列3"],
-				],
-			},
-			config1: {
-				data: [
-					{
-						name: "南阳",
-						value: 167,
-					},
-					{
-						name: "周口",
-						value: 67,
-					},
-					{
-						name: "漯河",
-						value: 123,
-					},
-					{
-						name: "郑州",
-						value: 55,
-					},
-					{
-						name: "西峡",
-						value: 98,
-					},
-				],
-			},
-			options: {
-				theme: "#1476d1",
-				video: {
-					url:
-						"http://www.xiaogan.gov.cn/u/cms/www/201902/271026196oyj.mp4",
-					pic:
-						"http://xiaogan.gov.cn/u/cms/www/201902/28091318ce87.png",
-					// type: "hls",
+			activeIndex: "1",
+			currentPage: 5,
+			list: [
+				{
+					id: 1,
+					title: "数据大屏一",
+					viewImg:
+						"https://oss.bladex.vip/caster/upload/20201120/59ed8621a5e3518aeea50a78f48de52f.jpg",
 				},
-				// screenshot: true, // 开启截图
-				contextmenu: [
+				{
+					id: 2,
+					title: "数据大屏二",
+					viewImg:
+						"https://oss.bladex.vip/caster/upload/20201123/abe47c7959de86f7b1b7e6134b7c8e7c.jpg",
+				},
+				{
+					id: 3,
+					title: "数据大屏三",
+					viewImg:
+						"https://oss.bladex.vip/caster/upload/20201120/ba6387c840d534047d55dc65e97b2ae4.jpg",
+				},
+				{
+					id: 4,
+					title: "数据大屏四",
+					viewImg:
+						"https://oss.bladex.vip/caster/upload/20201122/2bcf7deba047b28954099fea71b64c29.jpg",
+				},
+			],
+			dialog: {
+				title: "新建大屏",
+				visible: false,
+				width: "35%",
+			},
+			formData: {
+				group: "",
+				title: "",
+				width: 1920,
+				height: 1080,
+				password: "",
+			},
+			rules: {
+				group: {
+					required: true,
+					message: "请选择所属分组",
+					trigger: "change",
+				},
+				title: [
 					{
-						text: "custom1",
-						link: "https://github.com/DIYgod/DPlayer",
+						required: true,
+						message: "请填写大屏名称",
+						trigger: "blur",
 					},
+				],
+				width: [
 					{
-						text: "custom2",
-						click: (player) => {
-							console.log(player);
-						},
+						required: true,
+						message: "请填写大屏宽度",
+						trigger: "blur",
+					},
+				],
+				height: [
+					{
+						required: true,
+						message: "请填写大屏高度",
+						trigger: "blur",
+					},
+				],
+				password: [
+					{
+						required: true,
+						message: "请填写大屏密码",
+						trigger: "blur",
 					},
 				],
 			},
+			options: [
+				{
+					value: "1",
+					label: "集约化",
+				},
+				{
+					value: "2",
+					label: "新媒体",
+				},
+			],
 		};
+	},
+	methods: {
+		handleSelect(key, keyPath) {
+			console.log(key, keyPath);
+		},
+		handleSizeChange(val) {
+			console.log(`每页 ${val} 条`);
+		},
+		handleCurrentChange(val) {
+			console.log(`当前页: ${val}`);
+		},
+		add() {
+			this.dialog.visible = true;
+			this.formData = {
+				group: "1",
+				title: "测试数据",
+				width: 1920,
+				height: 1080,
+				password: "123456",
+			};
+			console.log("add");
+		},
+		del(id) {
+			console.log(id);
+			console.log("del");
+			this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+				confirmButtonText: "确定",
+				cancelButtonText: "取消",
+				type: "warning",
+			})
+				.then(() => {
+					this.$message({
+						type: "success",
+						message: "删除成功!",
+					});
+				})
+				.catch(() => {
+					this.$message({
+						type: "info",
+						message: "已取消删除",
+					});
+				});
+		},
+		edit(id) {
+			console.log(id);
+			console.log("edit");
+			this.$confirm("此文件处于发布状态, 是否继续?", "提示", {
+				confirmButtonText: "确定",
+				cancelButtonText: "取消",
+				type: "warning",
+			})
+				.then(() => {
+					this.$router.push({ name: "Edit", params: { id } });
+				})
+				.catch(() => {
+					this.$message({
+						type: "info",
+						message: "已取消删除",
+					});
+				});
+		},
+		view(id) {
+			console.log(id);
+			console.log("view");
+			let routeData = this.$router.resolve({
+				name: "View",
+				params: { id },
+			});
+			window.open(routeData.href, "_blank");
+		},
+		cancel(formName) {
+			this.$refs[formName].resetFields();
+			this.dialog.visible = false;
+		},
+		save(formName) {
+			this.$refs[formName].validate((valid) => {
+				if (valid) {
+					console.log(JSON.stringify(this[`${formName}Data`]));
+					this.dialog.visible = false;
+					const id = new Date().getTime();
+					this.$router.push({
+						name: "Edit",
+						params: { id },
+					});
+				} else {
+					console.log("error submit!!");
+					return false;
+				}
+			});
+		},
 	},
 };
 </script>
 
-<style lang="scss">
-.datav-page {
+<style scoped>
+.p-config {
 	height: 100%;
-	background-color: rgb(12, 30, 73);
-	font-size: 24px;
-	text-shadow: 0 0 3px #7acaec;
-	color: rgb(126, 198, 153);
-	user-select: none;
+	color: #000;
+	background-color: #171b22;
+}
+.p-config .config-header {
+	padding: 0;
+}
+.p-config .config-header .config-header-menu {
+	border-bottom: none;
+	background-color: #161a23;
+	background-image: url(https://data.avuejs.com/img/header.jpg);
+	background-repeat: no-repeat;
+	background-position: center right;
 }
 
-.index-box {
+.item-box {
+	margin-bottom: 20px;
+}
+
+.item {
+	position: relative;
 	box-sizing: border-box;
-	padding: 50px 20px 20px 20px;
+	height: 260px;
+	border: 1px solid #3a4659;
+	/* background-color: #fff; */
 }
 
-.border-box {
+.item-add {
+	border: 1px solid #00baff;
+	font-size: 14px;
+	color: #8eeeff;
+	background-image: linear-gradient(
+		-90deg,
+		rgba(0, 222, 255, 0.39),
+		rgba(0, 174, 255, 0.19)
+	);
+	-webkit-box-shadow: 0 0 10px 0 rgba(55, 224, 255, 0.3);
+	box-shadow: 0 0 10px 0 rgba(55, 224, 255, 0.3);
+	display: flex;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	cursor: pointer;
+}
+
+.item-add .add {
+	font-size: 20px;
+	text-align: center;
+}
+
+.item-add .add p {
+	font-size: 16px;
+	margin-top: 10px;
+}
+
+.view-img {
 	box-sizing: border-box;
+	height: 100%;
+	/* padding-bottom: 32px; */
 }
 
-.padding-10 {
-	padding: 10px;
+.view-img img {
+	display: block;
+	width: 100%;
+	height: 100%;
 }
 
-.margin-center {
-	margin: 0 auto;
+.view-bar {
+	box-sizing: border-box;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 32px;
+	padding: 0 8px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	background-color: rgba(0, 0, 0, 0.3);
+	color: #fff;
+	font-size: 14px;
+	line-height: 32px;
 }
 
-.margin-top-20 {
-	margin-top: 20px;
+.view-paging {
+	text-align: center;
 }
-
-// .flex-center {
-// 	.border-box-content {
-// 		display: flex;
-// 		align-items: center;
-// 		justify-content: center;
-// 		user-select: none;
-// 		flex-direction: column;
-// 	}
-// }
 </style>

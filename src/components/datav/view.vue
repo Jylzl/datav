@@ -3,24 +3,31 @@
  * @author: lizlong<94648929@qq.com>
  * @since: 2021-03-03 18:10:34
  * @LastAuthor: lizlong
- * @lastTime: 2021-03-04 18:05:15
+ * @lastTime: 2021-03-05 10:17:32
 -->
 
 <template>
 	<div class="datav-page">
 		<dv-full-screen-container style="position: relative;">
-			<!-- <template v-for="(item,index) in components"> -->
 			<!--页面组件列表展示-->
-			<Shape v-for="item in components" :key="item.key" :active="true">
+			<Shape
+				v-for="item in components"
+				:key="item.key"
+				:active="item === curComponent"
+				:defaultStyle="item.style"
+				:style="getShapeStyle(item.style)"
+			>
 				<component :is="'c-'+item.component" :data="item"></component>
 			</Shape>
-			<!-- </template> -->
+			<!-- 标线 -->
+			<MarkLine />
 		</dv-full-screen-container>
 	</div>
 </template>
 
 <script>
 import Shape from "@/components/datav/Shape.vue";
+import MarkLine from "@/components/datav/MarkLine.vue";
 
 import dvBorder1 from "@/components/datav/components/border/c-dv-border-1.vue";
 import dvBorder2 from "@/components/datav/components/border/c-dv-border-2.vue";
@@ -41,6 +48,7 @@ import dvDecoration13 from "@/components/datav/components/decoration/c-dv-decora
 export default {
 	components: {
 		Shape,
+		MarkLine,
 		"c-dv-border-Box-1": dvBorder1, //表单设计
 		"c-dv-border-Box-2": dvBorder2, //表单设计
 		"c-dv-border-Box-3": dvBorder3, //表单设计
@@ -62,6 +70,30 @@ export default {
 			default() {
 				return [];
 			},
+		},
+	},
+	data() {
+		return {
+			curComponent: null,
+		};
+	},
+	filters: {
+		jsonStringify(data) {
+			return JSON.stringify(data);
+		},
+	},
+	methods: {
+		getShapeStyle(style) {
+			const result = {};
+			["width", "height", "top", "left", "rotate"].forEach((attr) => {
+				if (attr != "rotate") {
+					result[attr] = style[attr] + "px";
+				} else {
+					result.transform = "rotate(" + style[attr] + "deg)";
+				}
+			});
+
+			return result;
 		},
 	},
 };

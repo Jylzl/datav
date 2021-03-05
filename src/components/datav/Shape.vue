@@ -3,11 +3,16 @@
  * @author: lizlong<94648929@qq.com>
  * @since: 2021-03-04 17:48:28
  * @LastAuthor: lizlong
- * @lastTime: 2021-03-04 18:17:50
+ * @lastTime: 2021-03-05 10:08:44
 -->
 <template>
 	<div class="shape" :class="{ active }" style="width:200px;height:50px;">
-		<div class="shape-point" v-for="item in pointList" :key="item"></div>
+		<div
+			class="shape-point"
+			v-for="item in (active? pointList : [])"
+			:key="item"
+			:style="getPointStyle(item)"
+		></div>
 		<slot></slot>
 	</div>
 </template>
@@ -18,6 +23,10 @@ export default {
 		active: {
 			type: Boolean,
 			default: false,
+		},
+		defaultStyle: {
+			require: true,
+			type: Object,
 		},
 	},
 	data() {
@@ -49,7 +58,45 @@ export default {
 		};
 	},
 	mounted() {},
-	methods: {},
+	methods: {
+		getPointStyle(point) {
+			const { width, height } = this.defaultStyle;
+			const hasT = /t/.test(point);
+			const hasB = /b/.test(point);
+			const hasL = /l/.test(point);
+			const hasR = /r/.test(point);
+			let newLeft = 0;
+			let newTop = 0;
+
+			// 四个角的点
+			if (point.length === 2) {
+				newLeft = hasL ? 0 : width;
+				newTop = hasT ? 0 : height;
+			} else {
+				// 上下两点的点，宽度居中
+				if (hasT || hasB) {
+					newLeft = width / 2;
+					newTop = hasT ? 0 : height;
+				}
+
+				// 左右两边的点，高度居中
+				if (hasL || hasR) {
+					newLeft = hasL ? 0 : width;
+					newTop = Math.floor(height / 2);
+				}
+			}
+
+			const style = {
+				marginLeft: hasR ? "-4px" : "-4px",
+				marginTop: "-4px",
+				left: `${newLeft}px`,
+				top: `${newTop}px`,
+				cursor: this.cursors[point],
+			};
+
+			return style;
+		},
+	},
 };
 </script>
 

@@ -6,7 +6,7 @@
 					<el-dropdown trigger="click" size="medium">
 						<el-button type="text" class="el-dropdown-link" size="mini">编辑(E)</el-button>
 						<el-dropdown-menu slot="dropdown">
-							<el-dropdown-item>新建</el-dropdown-item>
+							<el-dropdown-item @click.native="addCanvas">新建</el-dropdown-item>
 							<el-dropdown-item>打开</el-dropdown-item>
 							<el-dropdown-item>保存</el-dropdown-item>
 							<el-dropdown-item>预览</el-dropdown-item>
@@ -109,6 +109,8 @@
 								v-on:mousedown.ctrl="ctrlMousedown"
 								v-on:mouseup="ctrlMouseup"
 								v-on:click.ctrl="ctrlClick"
+								v-if="canvas.show"
+								:style="{width:canvas.width+'px',height:canvas.height+'px'}"
 							>
 								<d-view :components="componentData"></d-view>
 							</div>
@@ -134,6 +136,23 @@
 				</el-aside>
 			</el-container>
 		</el-main>
+		<!-- 新增 -->
+		<el-dialog :title="addDialog.titile" :visible.sync="addDialog.visible" :width="addDialog.width">
+			<div>
+				<el-form label-width="80px" :model="canvasForm">
+					<el-form-item label="宽度">
+						<el-input v-model="canvasForm.width"></el-input>
+					</el-form-item>
+					<el-form-item label="高度">
+						<el-input v-model="canvasForm.height"></el-input>
+					</el-form-item>
+				</el-form>
+			</div>
+			<span slot="footer" class="dialog-footer">
+				<el-button @click="addDialog.visible = false">取 消</el-button>
+				<el-button type="primary" @click="addDialog.visible = false">确 定</el-button>
+			</span>
+		</el-dialog>
 	</el-container>
 </template>
 
@@ -154,6 +173,20 @@ export default {
 			cursor: "cursor-default",
 			isFullscreen: false, //默认不全屏
 			componentData: [], //组件
+			addDialog: {
+				titile: "新增",
+				visible: false,
+				width: "30%",
+			},
+			canvas: {
+				show: false,
+				width: 1921,
+				height: 1080,
+			},
+			canvasForm: {
+				width: 1920,
+				height: 1080,
+			},
 		};
 	},
 	mounted() {
@@ -221,6 +254,11 @@ export default {
 					},
 					false
 				);
+		},
+		// 创建画布
+		addCanvas() {
+			console.log(111);
+			this.addDialog.visible = true;
 		},
 		// 创建组件
 		pushComponent(data) {
