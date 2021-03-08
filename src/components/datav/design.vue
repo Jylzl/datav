@@ -139,18 +139,18 @@
 		<!-- 新增 -->
 		<el-dialog :title="addDialog.titile" :visible.sync="addDialog.visible" :width="addDialog.width">
 			<div>
-				<el-form label-width="80px" :model="canvasForm">
-					<el-form-item label="宽度">
+				<el-form label-width="80px" :model="canvasForm" :rules="canvasRules" ref="canvasForm">
+					<el-form-item label="宽度" prop="width">
 						<el-input v-model="canvasForm.width"></el-input>
 					</el-form-item>
-					<el-form-item label="高度">
+					<el-form-item label="高度" prop="height">
 						<el-input v-model="canvasForm.height"></el-input>
 					</el-form-item>
 				</el-form>
 			</div>
 			<span slot="footer" class="dialog-footer">
 				<el-button @click="addDialog.visible = false">取 消</el-button>
-				<el-button type="primary" @click="addDialog.visible = false">确 定</el-button>
+				<el-button type="primary" @click="saveCanvasForm">确 定</el-button>
 			</span>
 		</el-dialog>
 	</el-container>
@@ -186,6 +186,16 @@ export default {
 			canvasForm: {
 				width: 1920,
 				height: 1080,
+			},
+			canvasRules: {
+				width: [
+					{ required: true, message: "宽度不能为空" },
+					{ type: "number", message: "宽度必须为数字值" },
+				],
+				height: [
+					{ required: true, message: "高度不能为空" },
+					{ type: "number", message: "高度必须为数字值" },
+				],
 			},
 		};
 	},
@@ -259,6 +269,13 @@ export default {
 		addCanvas() {
 			console.log(111);
 			this.addDialog.visible = true;
+		},
+		saveCanvasForm() {
+			this.canvas.show = true;
+			this.canvas.width = this.canvasForm.width;
+			this.canvas.height = this.canvasForm.height;
+			this.addDialog.visible = false;
+			console.log(this.canvas);
 		},
 		// 创建组件
 		pushComponent(data) {
